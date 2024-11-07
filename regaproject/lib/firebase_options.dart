@@ -92,4 +92,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'regaproject-c2cf7.firebasestorage.app',
     measurementId: 'G-8XCP4BPZ79',
   );
+
 }
