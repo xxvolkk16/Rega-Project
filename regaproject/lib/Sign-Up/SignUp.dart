@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../Sign-In/SignIn.dart';
+
+final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -17,10 +20,80 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
-  void _signUp() {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  void _signUp() async {
     if (_formKey.currentState!.validate()) {
-      // Perform sign-up logic here
-      print("Signed Up");
+      try {
+        // Create a new user with email and password
+        final UserCredential userCredential =
+            await _auth.createUserWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+
+        // Set the display name of the user
+        await userCredential.user
+            ?.updateDisplayName(_usernameController.text.trim());
+        await userCredential.user?.reload(); // Refresh user instance
+
+        // Add user data to Firestore after successful account creation
+        await _firestore.collection('users').doc(userCredential.user?.uid).set({
+          'username': _usernameController.text.trim(),
+          'email': _emailController.text.trim(),
+          'createdAt': Timestamp.now(),
+        });
+
+        // Show a success message
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Success'),
+            content: const Text('Registration successful!'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Close the Popup
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const SignInPage()),
+                  );
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+
+        print('User registered and data saved to Firestore');
+      } on FirebaseAuthException catch (e) {
+        // Handle Firebase errors
+        String message = '';
+        if (e.code == 'email-already-in-use') {
+          message = 'The email is already in use by another account.';
+        } else if (e.code == 'weak-password') {
+          message = 'The password is too weak.';
+        } else if (e.code == 'invalid-email') {
+          message = 'The email address is not valid.';
+        } else {
+          message = 'Registration failed. Please try again later.';
+        }
+
+        // Show error message
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Error'),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
     }
   }
 

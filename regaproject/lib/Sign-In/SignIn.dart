@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import '../Sign-Up/SignUp.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:regaproject/Home/Home.dart'; // Import your HomePage
+import '../Sign-Up/SignUp.dart'; // Import your SignUpPage
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _SignInPageState createState() => _SignInPageState();
 }
 
@@ -14,12 +14,75 @@ class _SignInPageState extends State<SignInPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  void _signIn() {
+  void _signIn() async {
     if (_formKey.currentState!.validate()) {
-      // Perform sign-in logic here
-      print("Signed In");
+      try {
+        // Sign-in with Firebase
+        UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+          email: _emailController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
+
+        // Show success popup and navigate to HomePage
+        _showLoginSuccessPopup(context);
+
+        print('User signed in: ${userCredential.user?.email}');
+      } on FirebaseAuthException catch (e) {
+        String message = '';
+        if (e.code == 'user-not-found') {
+          message = 'No user found for this email.';
+        } else if (e.code == 'wrong-password') {
+          message = 'Incorrect password.';
+        } else {
+          message = 'Login failed. Please try again.';
+        }
+
+        // Show error dialog
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Error'),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
     }
+  }
+
+  void _showLoginSuccessPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Welcome'),
+        content: const Text('You have successfully logged in!'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close the dialog
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const HomePage()),
+              );
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _signInWithGoogle() async {
+    // Add your Google sign-in logic here
+    // This example just prints a message for now
+    print('Google Sign-In button clicked');
   }
 
   @override
@@ -31,15 +94,13 @@ class _SignInPageState extends State<SignInPage> {
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage(
-                    'assets/img/yogabg.png'), // Change to your image asset
+                image: AssetImage('assets/img/yogabg.png'), // Replace with your asset
                 fit: BoxFit.cover,
               ),
             ),
           ),
           Container(
-            color: Colors.black
-                .withOpacity(0.5), // Adding an overlay for text visibility
+            color: Colors.black.withOpacity(0.5), // Adding an overlay for text visibility
           ),
           Center(
             child: Padding(
@@ -62,10 +123,9 @@ class _SignInPageState extends State<SignInPage> {
                       controller: _emailController,
                       style: const TextStyle(color: Colors.white),
                       decoration: InputDecoration(
-                        labelText: 'USERNAME',
+                        labelText: 'EMAIL',
                         labelStyle: const TextStyle(color: Colors.white),
-                        prefixIcon:
-                            const Icon(Icons.person, color: Colors.white),
+                        prefixIcon: const Icon(Icons.person, color: Colors.white),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -74,7 +134,7 @@ class _SignInPageState extends State<SignInPage> {
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Please enter your username';
+                          return 'Please enter your email';
                         }
                         return null;
                       },
@@ -102,24 +162,10 @@ class _SignInPageState extends State<SignInPage> {
                       },
                     ),
                     const SizedBox(height: 16),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          // Add your logic for forgot password
-                        },
-                        child: const Text(
-                          'Forget password?',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: _signIn,
                       style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 12, horizontal: 24),
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -138,8 +184,7 @@ class _SignInPageState extends State<SignInPage> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (context) => const SignUpPage()),
+                          MaterialPageRoute(builder: (context) => const SignUpPage()),
                         );
                       },
                       child: const Text(
@@ -149,20 +194,17 @@ class _SignInPageState extends State<SignInPage> {
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
-                      onPressed: () {
-                        // Sign in with Google logic here
-                      },
+                      onPressed: _signInWithGoogle,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white, // ปรับสีปุ่มตามต้องการ
-                        foregroundColor: Colors.black, // สีของไอคอนและข้อความ
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 12, horizontal: 24),
+                        backgroundColor: Colors.white, // Customize button color
+                        foregroundColor: Colors.black, // Icon and text color
+                        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
                       icon: const Icon(
-                        FontAwesomeIcons.google, // ใช้ไอคอนจาก FontAwesome
+                        Icons.g_mobiledata, // You can change this to a Google icon
                         size: 24,
                       ),
                       label: const Text('Sign in with Google'),
