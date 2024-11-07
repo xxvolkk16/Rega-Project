@@ -10,7 +10,6 @@ Checking for npm/bin/npm-cli install at /Users/volkk/.cache/firebase/tools/lib/n
 Checking for npm/bin/npm-cli install at /Users/volkk/.cache/firebase/tools/node_modules/npm/bin/npm-cli
 Checking for npm/bin/npm-cli install at /snapshot/firepit/node_modules/npm/bin/npm-cli
 Found npm/bin/npm-cli install.
-ShellJSInternalError: ENOENT: no such file or directory, unlink '/Users/volkk/.cache/firebase/runtime/npm.bat'
 Runtime binaries created.
 /usr/local/bin/firebase
 /usr/local/bin/firebase,/snapshot/firepit/firepit.js,--version
@@ -22,4 +21,4 @@ Checking for npm/bin/npm-cli install at /Users/volkk/.cache/firebase/tools/lib/n
 Checking for npm/bin/npm-cli install at /Users/volkk/.cache/firebase/tools/node_modules/npm/bin/npm-cli
 Checking for npm/bin/npm-cli install at /snapshot/firepit/node_modules/npm/bin/npm-cli
 Found npm/bin/npm-cli install.
-ShellJSInternalError: ENOENT: no such file or directory, chmod '/Users/volkk/.cache/firebase/runtime/node.js'
+ShellJSInternalError: ENOENT: no such file or directory, stat '/Users/volkk/.cache/firebase/runtime/shell'
