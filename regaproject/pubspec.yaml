@@ -61,6 +61,13 @@ flutter:
 
   assets:
     - assets/img/yogabg.png
+    - assets/img/yoga1.png
+    - assets/img/yoga2.png
+    - assets/img/yoga3.png
+    - assets/img/yoga4.png
+    - assets/img/yoga_pose1.png
+    - assets/img/yoga_pose2.png
+    - assets/img/yoga_pose3.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
